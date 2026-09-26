@@ -22,6 +22,7 @@
     "jszip": "^3.10.2",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.3.289",
+    "ws": "^8.21.3",
     "zod": "^3.25.76"
   },
   "devDependencies": {

@@ -6,7 +6,7 @@ This repository is the foundation only: client bootstrap, dynamic command/event 
 
 ## Requirements
 
-- Node.js 20 or later
+- Node.js 20 or later (Node 22 recommended on Render)
 - A [Discord application](https://discord.com/developers/applications) with a bot user
 - A [Supabase](https://supabase.com) project (URL + anon key)
 
