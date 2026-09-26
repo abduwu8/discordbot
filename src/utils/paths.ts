@@ -12,6 +12,7 @@ export const bannerPath = join(imagesPath, 'banner.png');
 export const battleImagePath = join(imagesPath, '1v1.png');
 export const roadmapBannerPath = join(imagesPath, 'Roadmap.png');
 export const rulesBannerPath = join(imagesPath, 'rules.png');
+export const resourcesBannerPath = join(imagesPath, 'Resources.png');
 export const introductionBannerPath = join(imagesPath, 'introduction.png');
 export const resumeBannerPath = join(imagesPath, 'resume.png');
 export const dataPath = join(projectRoot, 'data');

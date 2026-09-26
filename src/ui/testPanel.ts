@@ -15,6 +15,7 @@ import {
   type InteractionEditReplyOptions,
   type InteractionReplyOptions,
 } from 'discord.js';
+import { resourcesPanelReplyOptions } from './resourcesPanel.js';
 import { bannerPath, roadmapBannerPath } from '../utils/paths.js';
 import { battleJoinSlot1, battleJoinSlot2 } from '../features/battle/constants.js';
 import { startMatchedBattle } from '../features/battle/handler.js';
@@ -320,10 +321,7 @@ export async function handleTestComponent(interaction: ButtonInteraction): Promi
   }
 
   if (interaction.customId === testCustomIds.resources) {
-    await interaction.reply({
-      content: 'Resources will be uploaded soon.',
-      ephemeral: true,
-    });
+    await interaction.reply(resourcesPanelReplyOptions(true));
     return;
   }
 
