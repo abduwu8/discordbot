@@ -21,13 +21,14 @@ import { startMatchedBattle } from '../features/battle/handler.js';
 import { claimLobbySlot } from '../features/battle/store.js';
 import { customRoadmapIds, handleCustomRoadmap } from '../features/roadmap/handler.js';
 import { buildRoadmapPdf } from '../features/roadmap/pdf.js';
-import { getYearRoadmap } from '../features/roadmap/yearPlans.js';
-
-const years = [
-  { id: '1', label: 'First Year' },
-  { id: '2', label: 'Second Year' },
-  { id: '3', label: 'Third Year' },
-] as const;
+import {
+  getProgram,
+  getProgramYears,
+  getYearRoadmap,
+  isProgramId,
+  programs,
+  type ProgramId,
+} from '../features/roadmap/yearPlans.js';
 
 const accentColor = 0xeb459e;
 const bannerAttachmentName = 'banner.png';
@@ -39,22 +40,41 @@ export const testCustomIds = {
   customRoadmap: customRoadmapIds.start,
   battleJoin1: battleJoinSlot1,
   battleJoin2: battleJoinSlot2,
-  roadmapYear: (year: string) => `test:roadmap:year:${year}`,
-  roadmapPdf: (year: string) => `test:roadmap:pdf:${year}`,
+  roadmapProgram: (program: ProgramId) => `test:roadmap:program:${program}`,
+  roadmapYear: (program: ProgramId, year: string) => `test:roadmap:year:${program}:${year}`,
+  roadmapPdf: (program: ProgramId, year: string) => `test:roadmap:pdf:${program}:${year}`,
   roadmapBack: 'test:roadmap:back',
+  roadmapBackYears: (program: ProgramId) => `test:roadmap:back:${program}`,
 } as const;
 
-const roadmapYearPattern = /^test:roadmap:year:([123])$/;
-const roadmapPdfPattern = /^test:roadmap:pdf:([123])$/;
+const roadmapProgramPattern = /^test:roadmap:program:(bca|mca)$/;
+const roadmapYearPattern = /^test:roadmap:year:(bca|mca):([123])$/;
+const roadmapPdfPattern = /^test:roadmap:pdf:(bca|mca):([123])$/;
+const roadmapBackYearsPattern = /^test:roadmap:back:(bca|mca)$/;
 
 const componentsV2 = MessageFlags.IsComponentsV2;
 const ephemeralV2 = MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral;
 
-function yearButtons(): ActionRowBuilder<ButtonBuilder> {
+function parseProgramId(value: string | undefined): ProgramId | undefined {
+  return value && isProgramId(value) ? value : undefined;
+}
+
+function programButtons(): ActionRowBuilder<ButtonBuilder> {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    ...years.map((year) =>
+    ...programs.map((program) =>
       new ButtonBuilder()
-        .setCustomId(testCustomIds.roadmapYear(year.id))
+        .setCustomId(testCustomIds.roadmapProgram(program.id))
+        .setLabel(program.label)
+        .setStyle(ButtonStyle.Secondary),
+    ),
+  );
+}
+
+function yearButtons(programId: ProgramId): ActionRowBuilder<ButtonBuilder> {
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    ...getProgramYears(programId).map((year) =>
+      new ButtonBuilder()
+        .setCustomId(testCustomIds.roadmapYear(programId, year.id))
         .setLabel(year.label)
         .setStyle(ButtonStyle.Secondary),
     ),
@@ -161,7 +181,7 @@ export function buildTestPanel(): ContainerBuilder {
     );
 }
 
-function buildRoadmapYearPicker(): ContainerBuilder {
+function buildRoadmapProgramPicker(): ContainerBuilder {
   const files = roadmapBannerFiles();
   const container = new ContainerBuilder().setAccentColor(accentColor);
   if (files.length) {
@@ -171,20 +191,54 @@ function buildRoadmapYearPicker(): ContainerBuilder {
   return container
     .addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
-        ['## Roadmap', 'Pick your year for a full BCA plan — subjects, skills, habits, and links.'].join('\n'),
+        [
+          '## Roadmap',
+          'Choose your program, then pick a year for a full plan — subjects, skills, habits, and links.',
+          '',
+          ...programs.map((program) => `- **${program.label}** — ${program.blurb}`),
+        ].join('\n'),
       ),
     )
-    .addActionRowComponents(yearButtons());
+    .addActionRowComponents(programButtons());
 }
 
-function buildYearRoadmap(yearId: string, yearLabel: string): ContainerBuilder {
+function buildRoadmapYearPicker(programId: ProgramId): ContainerBuilder {
   const files = roadmapBannerFiles();
   const container = new ContainerBuilder().setAccentColor(accentColor);
   if (files.length) {
     container.addMediaGalleryComponents(roadmapBannerGallery());
   }
 
-  const body = getYearRoadmap(yearId) ?? `## ${yearLabel} Roadmap\nContent is not available yet.`;
+  const program = getProgram(programId);
+  const title = program ? `${program.label} Roadmap` : 'Roadmap';
+  const hint =
+    programId === 'mca'
+      ? 'Pick your year for a full MCA plan — subjects, skills, internships, and links.'
+      : 'Pick your year for a full BCA plan — subjects, skills, habits, and links.';
+
+  return container
+    .addTextDisplayComponents(new TextDisplayBuilder().setContent(['## ' + title, hint].join('\n')))
+    .addActionRowComponents(yearButtons(programId))
+    .addActionRowComponents(
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(testCustomIds.roadmapBack)
+          .setLabel('Back')
+          .setStyle(ButtonStyle.Primary),
+      ),
+    );
+}
+
+function buildYearRoadmap(programId: ProgramId, yearId: string, yearLabel: string): ContainerBuilder {
+  const files = roadmapBannerFiles();
+  const container = new ContainerBuilder().setAccentColor(accentColor);
+  if (files.length) {
+    container.addMediaGalleryComponents(roadmapBannerGallery());
+  }
+
+  const program = getProgram(programId);
+  const body =
+    getYearRoadmap(programId, yearId) ?? `## ${program?.label ?? ''} ${yearLabel} Roadmap\nContent is not available yet.`;
   for (const chunk of chunkText(body)) {
     container.addTextDisplayComponents(new TextDisplayBuilder().setContent(chunk));
   }
@@ -192,12 +246,12 @@ function buildYearRoadmap(yearId: string, yearLabel: string): ContainerBuilder {
   return container.addActionRowComponents(
     new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
-        .setCustomId(testCustomIds.roadmapPdf(yearId))
+        .setCustomId(testCustomIds.roadmapPdf(programId, yearId))
         .setLabel('Download PDF')
         .setEmoji('📄')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
-        .setCustomId(testCustomIds.roadmapBack)
+        .setCustomId(testCustomIds.roadmapBackYears(programId))
         .setLabel('Back')
         .setStyle(ButtonStyle.Primary),
     ),
@@ -284,20 +338,35 @@ export async function handleTestComponent(interaction: ButtonInteraction): Promi
   }
 
   if (interaction.customId === testCustomIds.roadmap) {
-    await interaction.reply(roadmapReplyOptions(buildRoadmapYearPicker()));
+    await interaction.reply(roadmapReplyOptions(buildRoadmapProgramPicker()));
     return;
   }
 
   if (interaction.customId === testCustomIds.roadmapBack) {
-    await interaction.update(roadmapReplyOptions(buildRoadmapYearPicker()));
+    await interaction.update(roadmapReplyOptions(buildRoadmapProgramPicker()));
+    return;
+  }
+
+  const backYearsProgram = parseProgramId(roadmapBackYearsPattern.exec(interaction.customId)?.[1]);
+  if (backYearsProgram) {
+    await interaction.update(roadmapReplyOptions(buildRoadmapYearPicker(backYearsProgram)));
+    return;
+  }
+
+  const selectedProgram = parseProgramId(roadmapProgramPattern.exec(interaction.customId)?.[1]);
+  if (selectedProgram) {
+    await interaction.update(roadmapReplyOptions(buildRoadmapYearPicker(selectedProgram)));
     return;
   }
 
   const roadmapPdfMatch = roadmapPdfPattern.exec(interaction.customId);
-  if (roadmapPdfMatch) {
-    const year = years.find((item) => item.id === roadmapPdfMatch[1]);
-    const body = year ? getYearRoadmap(year.id) : undefined;
-    if (!year || !body) {
+  const pdfProgram = parseProgramId(roadmapPdfMatch?.[1]);
+  if (roadmapPdfMatch && pdfProgram) {
+    const programId = pdfProgram;
+    const year = getProgramYears(programId).find((item) => item.id === roadmapPdfMatch[2]);
+    const body = year ? getYearRoadmap(programId, year.id) : undefined;
+    const program = getProgram(programId);
+    if (!year || !body || !program) {
       await interaction.reply({
         content: 'That year roadmap is not available yet.',
         ephemeral: true,
@@ -306,12 +375,16 @@ export async function handleTestComponent(interaction: ButtonInteraction): Promi
     }
 
     await interaction.deferReply({ ephemeral: true });
-    const pdf = await buildRoadmapPdf(`${year.label} Roadmap`, 'BCA Hub · year plan', body);
+    const pdf = await buildRoadmapPdf(
+      `${program.label} ${year.label} Roadmap`,
+      'BCA Hub · year plan',
+      body,
+    );
     await interaction.editReply({
-      content: `Your **${year.label}** roadmap PDF is ready.`,
+      content: `Your **${program.label} ${year.label}** roadmap PDF is ready.`,
       files: [
         new AttachmentBuilder(pdf, {
-          name: `${year.label.toLowerCase().replace(/\s+/g, '-')}-roadmap.pdf`,
+          name: `${program.label.toLowerCase()}-${year.label.toLowerCase().replace(/\s+/g, '-')}-roadmap.pdf`,
         }),
       ],
     });
@@ -319,14 +392,16 @@ export async function handleTestComponent(interaction: ButtonInteraction): Promi
   }
 
   const roadmapYearMatch = roadmapYearPattern.exec(interaction.customId);
-  if (!roadmapYearMatch) {
+  const yearProgram = parseProgramId(roadmapYearMatch?.[1]);
+  if (!roadmapYearMatch || !yearProgram) {
     return;
   }
 
-  const year = years.find((item) => item.id === roadmapYearMatch[1]);
+  const programId = yearProgram;
+  const year = getProgramYears(programId).find((item) => item.id === roadmapYearMatch[2]);
   if (!year) {
     return;
   }
 
-  await interaction.update(roadmapReplyOptions(buildYearRoadmap(year.id, year.label)));
+  await interaction.update(roadmapReplyOptions(buildYearRoadmap(programId, year.id, year.label)));
 }

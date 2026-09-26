@@ -1,5 +1,24 @@
+export type ProgramId = 'bca' | 'mca';
+
+export const programs: { id: ProgramId; label: string; blurb: string }[] = [
+  { id: 'bca', label: 'BCA', blurb: '3-year undergraduate plan' },
+  { id: 'mca', label: 'MCA', blurb: '2-year postgraduate plan' },
+];
+
+export const programYears: Record<ProgramId, { id: string; label: string }[]> = {
+  bca: [
+    { id: '1', label: 'First Year' },
+    { id: '2', label: 'Second Year' },
+    { id: '3', label: 'Third Year' },
+  ],
+  mca: [
+    { id: '1', label: 'First Year' },
+    { id: '2', label: 'Second Year' },
+  ],
+};
+
 export const yearRoadmaps: Record<string, string> = {
-  '1': [
+  'bca:1': [
     '## First Year Roadmap',
     '**Goal:** Build a programming habit, understand how computers work, and finish Year 1 subjects without cramming.',
     '',
@@ -53,7 +72,7 @@ export const yearRoadmaps: Record<string, string> = {
     '- First-year project does not need React. Working code + a README beats a fancy UI you cannot explain.',
   ].join('\n'),
 
-  '2': [
+  'bca:2': [
     '## Second Year Roadmap',
     '**Goal:** Become a real CS student — DSA, databases, OS, OOP, and a web project you can demo.',
     '',
@@ -112,7 +131,7 @@ export const yearRoadmaps: Record<string, string> = {
     '- Start a simple resume now. Update it every time you finish a project or lab worth showing.',
   ].join('\n'),
 
-  '3': [
+  'bca:3': [
     '## Third Year Roadmap',
     '**Goal:** Graduate with internships, a strong project, interview readiness, and a direction (job, MCA, or both).',
     '',
@@ -170,8 +189,134 @@ export const yearRoadmaps: Record<string, string> = {
     '- Sleep and consistency beat 14-hour panic weeks before drives.',
     '- Keep notes of every interview question you miss. That list is your last-month syllabus.',
   ].join('\n'),
+
+  'mca:1': [
+    '## MCA First Year Roadmap',
+    '**Goal:** Close undergrad gaps, go deep on DSA + systems, and ship one production-quality project before internships.',
+    '',
+    '### What Year 1 is for',
+    'MCA is shorter than BCA. You do not have three years to “figure it out.” Year 1 is **level-up**: stronger CS core, interview-ready DSA, and a project that looks like work, not a lab.',
+    '',
+    'If you came from BCA, skip beginner tutorials. If you came from another degree, spend the first 8 weeks on programming + DBMS + OS until those feel normal.',
+    '',
+    '### Subjects to take seriously',
+    '- Data structures & algorithms (treat this as a job skill, not a paper)',
+    '- Advanced programming (Java / Python / C++ — match your lab + one interview language)',
+    '- DBMS + SQL',
+    '- Operating systems & computer networks',
+    '- Software engineering / OOAD',
+    '- Discrete math / theory papers if they appear in your syllabus',
+    '',
+    '### Skills to finish this year',
+    '1. Medium DSA you can explain out loud (arrays, hashing, trees, graphs, basic DP)',
+    '2. SQL you can write without Googling every JOIN',
+    '3. One backend or full-stack app with auth, a real schema, and deploy',
+    '4. Git workflow that is not “zip the folder”',
+    '5. Plain-English OS/CN: process vs thread, HTTP, DNS, indexes, transactions',
+    '',
+    '### Semester plan',
+    '**Sem 1**',
+    '- Pick one interview language and stay on it (Java or Python is enough)',
+    '- DSA sheet: easy → medium. Target consistency (5 days/week), not 400 problems',
+    '- Rebuild one old BCA project *properly*: tests, README, error handling, deploy',
+    '- SQL daily for 20 minutes until JOINs and GROUP BY are automatic',
+    '',
+    '**Sem 2**',
+    '- Start the project you will show internships: campus/ops tool, internal dashboard, API + DB',
+    '- OS + networks notes: 2-page cheat sheets, not 80-page dumps',
+    '- Apply to internships from mid-year. MCA internships move earlier than you think',
+    '- Optional lane (pick one): cloud basics, ML intro, or mobile — only if core is stable',
+    '',
+    '### Project bar (this year)',
+    '- A database, auth, and one non-trivial feature',
+    '- Deployed demo or a recorded walkthrough',
+    '- README with architecture (boxes and arrows, not a novel)',
+    '',
+    '### Free starting points',
+    '- [NeetCode Roadmap](https://neetcode.io/roadmap)',
+    '- [SQLBolt](https://sqlbolt.com/) + [Mode SQL tutorial](https://mode.com/sql-tutorial/)',
+    '- [Operating Systems: Three Easy Pieces](https://pages.cs.wisc.edu/~remzi/OSTEP/)',
+    '- [Missing Semester](https://missing.csail.mit.edu/) — shell, Git, debugging',
+    '- [The Odin Project](https://www.theodinproject.com/) or [full-stack-open](https://fullstackopen.com/en/) if your stack is web',
+    '- [Tech Interview Handbook](https://www.techinterviewhandbook.org/)',
+    '',
+    '### Tips',
+    '- MCA classes will not magically make you employable. Labs + GitHub will.',
+    '- Do not collect certificates. Collect shipped work and problems you can re-solve cold.',
+    '- If math/theory is weak, 30 minutes/day beats a panic month before exams.',
+    '- Talk to seniors about *which companies visit your campus* and reverse-engineer that bar.',
+  ].join('\n'),
+
+  'mca:2': [
+    '## MCA Second Year Roadmap',
+    '**Goal:** Graduate with internships (or a job), a flagship project, interview stamina, and a clear lane — software, data, or further study.',
+    '',
+    '### What Year 2 is for',
+    'This is the placement year. Depth beats novelty. Companies want **DSA you can do on a whiteboard**, **a project you own**, and **CS fundamentals** (OS, DBMS, CN, OOP). Electives are for a story, not a shopping list.',
+    '',
+    '### Subjects to take seriously',
+    '- Major project / internship / seminar — this *is* your portfolio',
+    '- Remaining core and electives (AI/ML, cloud, security, mobile — pick to match the job)',
+    '- Any paper that shows up in campus MCQ / technical rounds',
+    '',
+    '### Pick a lane (do not pick four)',
+    '- **Software job:** DSA + one backend or full-stack + light system design + 2 strong projects',
+    '- **Data / ML:** Python, SQL, pandas, one project on a real dataset, stats revision',
+    '- **Product / startup intern:** ship fast, talk to users, measure something',
+    '',
+    '### Skills to finish this year',
+    '1. Interview DSA under a timer (medium as default, graphs/DP at a basic–medium level)',
+    '2. Project story: problem, architecture, hardest bug, tradeoffs, what you would redo',
+    '3. One-page resume with numbers (users, latency, coverage, tickets closed)',
+    '4. Core CS revision sheets you can recite',
+    '5. Professional basics: GitHub pinned repos, LinkedIn that matches the resume, polite follow-ups',
+    '',
+    '### Semester plan',
+    '**Sem 3**',
+    '- Freeze the major-project scope. Weekly demos. No “we will add AI later” unless it is the product',
+    '- 4–5 DSA days a week if you want product / service companies',
+    '- Applications: campus + LinkedIn + careers pages + referrals. Volume with a tracked sheet',
+    '- Mock interviews: 45 min DSA + 15 min project, every week',
+    '',
+    '**Sem 4**',
+    '- Polish, deploy, write a short case-study README, record a 3-minute demo',
+    '- Core revision: OS, DBMS, CN, OOP — 2 pages each, then past questions',
+    '- If still hunting: 2 serious applications a day until interviews stack',
+    '- If you have an offer: still finish the project so joining / probation is not embarrassing',
+    '',
+    '### Final project bar',
+    '- A problem someone besides you cares about',
+    '- Auth, data model, and one non-trivial feature (search, reports, realtime, ML inference, queues, etc.)',
+    '- Deployed or a recorded demo',
+    '- Honest limitations — interviewers respect this more than fake scale',
+    '',
+    '### Free starting points',
+    '- [NeetCode](https://neetcode.io/) / [LeetCode Patterns](https://seanprashad.com/leetcode-patterns/)',
+    '- [System Design Primer](https://github.com/donnemartin/system-design-primer) — enough to draw *your* app',
+    '- [CS50 AI](https://cs50.harvard.edu/ai/) or [Kaggle Learn](https://www.kaggle.com/learn) if you chose data/ML',
+    '- [Tech Interview Handbook](https://www.techinterviewhandbook.org/)',
+    '- Company engineering blogs for the stack you claim on the resume',
+    '',
+    '### Tips',
+    '- Two years go fast. Start internships in Year 1 so Year 2 is not a cold start.',
+    '- One excellent project beats four clones with the same login screen.',
+    '- Keep a miss-list from every interview. That list is your last-month syllabus.',
+    '- Sleep and mocks beat 14-hour panic weeks before drives.',
+  ].join('\n'),
 };
 
-export function getYearRoadmap(yearId: string): string | undefined {
-  return yearRoadmaps[yearId];
+export function isProgramId(value: string): value is ProgramId {
+  return value === 'bca' || value === 'mca';
+}
+
+export function getProgram(programId: string) {
+  return programs.find((item) => item.id === programId);
+}
+
+export function getProgramYears(programId: ProgramId) {
+  return programYears[programId];
+}
+
+export function getYearRoadmap(programId: ProgramId, yearId: string): string | undefined {
+  return yearRoadmaps[`${programId}:${yearId}`];
 }
