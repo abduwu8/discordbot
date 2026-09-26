@@ -5,7 +5,7 @@ import { resourcesPanelReplyOptions } from '../../ui/resourcesPanel.js';
 export const command: Command = {
   data: new SlashCommandBuilder()
     .setName('resources')
-    .setDescription('Show Semicolony study resources.')
+    .setDescription('Show study resources.')
     .setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction): Promise<void> {
     await interaction.deferReply();

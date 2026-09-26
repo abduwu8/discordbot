@@ -14,7 +14,7 @@ import {
   type InteractionEditReplyOptions,
   type InteractionReplyOptions,
 } from 'discord.js';
-import { semicolonyResources } from '../data/semicolonyResources.js';
+import { studyResources } from '../data/semicolonyResources.js';
 import { resourcesBannerPath } from '../utils/paths.js';
 
 const accentColor = 0x57f287;
@@ -39,8 +39,8 @@ function resourcesBannerGallery(): MediaGalleryBuilder {
 function resourceButtonRows(): ActionRowBuilder<ButtonBuilder>[] {
   const rows: ActionRowBuilder<ButtonBuilder>[] = [];
 
-  for (let index = 0; index < semicolonyResources.length; index += buttonsPerRow) {
-    const slice = semicolonyResources.slice(index, index + buttonsPerRow);
+  for (let index = 0; index < studyResources.length; index += buttonsPerRow) {
+    const slice = studyResources.slice(index, index + buttonsPerRow);
     rows.push(
       new ActionRowBuilder<ButtonBuilder>().addComponents(
         ...slice.map((resource) =>
@@ -69,9 +69,9 @@ export function buildResourcesPanel(): ContainerBuilder {
       new TextDisplayBuilder().setContent(
         [
           '# Resources',
-          'Open a Semicolony roadmap for the topic you want. Each button opens the matching track in your browser.',
+          'Pick a topic. Each button opens the matching study track.',
           '',
-          'Mathematics currently has **no dedicated Semicolony roadmap**. Full stack is split into **Frontend** and **Backend**.',
+          'Mathematics currently has **no dedicated roadmap**. Full stack is split into **Frontend** and **Backend**.',
         ].join('\n'),
       ),
     )
