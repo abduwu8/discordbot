@@ -1,3 +1,4 @@
+import './net.js';
 import type { Server } from 'node:http';
 import { env } from './config/env.js';
 import { clientOptions } from './config/client.js';
@@ -24,6 +25,8 @@ async function bootstrap(): Promise<void> {
   await loadCommands(client);
   attachGatewayWatch(client, () => shuttingDown);
 
+  await probeDiscordToken(env.DISCORD_TOKEN);
+  logger.info(`Logging in to Discord (token length ${env.DISCORD_TOKEN.length})`);
   await client.login(env.DISCORD_TOKEN);
 
   if (env.NODE_ENV === 'production') {
@@ -73,3 +76,22 @@ void bootstrap().catch((error: unknown) => {
   logger.error('Bella failed to start:', error);
   process.exit(1);
 });
+
+async function probeDiscordToken(token: string): Promise<void> {
+  try {
+    const response = await fetch('https://discord.com/api/v10/users/@me', {
+      headers: { Authorization: `Bot ${token}` },
+    });
+
+    if (response.ok) {
+      const user = (await response.json()) as { username?: string };
+      logger.success(`Discord REST reachable as ${user.username ?? 'unknown'}`);
+      return;
+    }
+
+    const body = await response.text();
+    logger.error(`Discord REST rejected the token (HTTP ${response.status}): ${body.slice(0, 300)}`);
+  } catch (error: unknown) {
+    logger.error('Discord REST probe failed (network):', error);
+  }
+}

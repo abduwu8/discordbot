@@ -54,12 +54,22 @@ export function attachGatewayWatch(client: Client, isShuttingDown: () => boolean
     logger.error(`Shard ${shardId} error:`, error);
   });
 
+  client.on(Events.Debug, (message) => {
+    if (gatewayState.everReady) {
+      return;
+    }
+
+    logger.info(`[discord] ${message}`);
+  });
+
   setTimeout(() => {
     if (isShuttingDown() || client.isReady()) {
       return;
     }
 
-    recycle('login timed out');
+    logger.error(
+      'Discord login still not ready after 90s. Check DISCORD_TOKEN, Server Members intent, and that no other host uses this token.',
+    );
   }, 90_000);
 
   setInterval(() => {
