@@ -9,12 +9,18 @@ export function startHealthServer(port: number, client: Client): Server {
     if (req.method === 'GET' && (path === '/' || path === '/health')) {
       const ready = client.isReady();
       const body = JSON.stringify({
-        ok: true,
-        status: ready ? 'ok' : 'starting',
+        ok: ready,
+        status: ready ? 'ok' : 'disconnected',
         bot: ready ? (client.user?.tag ?? null) : null,
+        ping: ready ? client.ws.ping : null,
       });
 
-      res.writeHead(200, {
+      // `/` stays 200 so uptime pings keep the free instance awake even during
+      // a brief reconnect. `/health` is 503 when the Discord gateway is down
+      // so Render recycles the process instead of serving a dead bot.
+      const httpStatus = path === '/' || ready ? 200 : 503;
+
+      res.writeHead(httpStatus, {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-store',
       });

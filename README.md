@@ -82,7 +82,11 @@ The process also binds an HTTP server on `PORT` (default `10000`) and serves `GE
 4. Set environment variables (same names as `.env.example`). `NODE_ENV` must be `production`. Render injects `PORT`; do not hard-code it.
 5. After the first deploy, open `https://<your-service>.onrender.com/health` and confirm it returns JSON.
 
-Free web services sleep after about 15 minutes without inbound HTTP traffic, which drops the Discord gateway connection. Ping `/health` every 5–10 minutes with an uptime monitor so the bot stays awake.
+Free web services sleep after about 15 minutes without inbound HTTP traffic, which drops the Discord gateway connection. Ping `/` every 5–10 minutes with an uptime monitor so the bot stays awake.
+
+**Do not run the bot locally with the same `DISCORD_TOKEN` as Render.** Discord allows one gateway session per token. `npm run dev` on your PC steals the connection from Render; when you close the terminal, that session dies and Render’s process can be left with HTTP still “up” while the bot is offline in Discord. Stop the local process (or use a separate development bot application) and let only Render hold the production token.
+
+`GET /` is a keep-alive (always HTTP 200). `GET /health` is ready only when the Discord gateway is connected (`ok: true`); otherwise it returns 503 so Render can restart.
 
 Local JSON files under `data/` are ephemeral on Render (no persistent disk on the free tier). Cooldowns and introductions reset on every restart.
 

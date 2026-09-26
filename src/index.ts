@@ -5,12 +5,14 @@ import './database/supabase.js';
 import { loadCommands } from './handlers/loadCommands.js';
 import { loadEvents } from './handlers/loadEvents.js';
 import { registerSlashCommands } from './handlers/registerCommands.js';
+import { attachGatewayWatch } from './discord/gatewayWatch.js';
 import { startHealthServer } from './http/server.js';
 import { BellaClient } from './types/client.js';
 import { logger } from './utils/logger.js';
 
 const client = new BellaClient(clientOptions);
 let httpServer: Server | undefined;
+let shuttingDown = false;
 
 async function bootstrap(): Promise<void> {
   logger.info(`Starting Bella (${env.NODE_ENV})`);
@@ -20,6 +22,7 @@ async function bootstrap(): Promise<void> {
 
   await loadEvents(client);
   await loadCommands(client);
+  attachGatewayWatch(client, () => shuttingDown);
 
   if (env.NODE_ENV === 'production') {
     try {
@@ -33,6 +36,7 @@ async function bootstrap(): Promise<void> {
 }
 
 async function shutdown(signal: string): Promise<void> {
+  shuttingDown = true;
   logger.info(`Received ${signal}; shutting down Bella`);
 
   try {
