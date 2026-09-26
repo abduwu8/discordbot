@@ -9,7 +9,14 @@ export function startHealthServer(port: number, client: Client): Server {
 
     if (req.method === 'GET' && (path === '/' || path === '/health')) {
       const ready = client.isReady();
-      const status = ready ? 'ok' : gatewayState.everReady ? 'disconnected' : 'starting';
+      const rateLimited = !ready && gatewayState.rateLimitedUntil > Date.now();
+      const status = ready
+        ? 'ok'
+        : rateLimited
+          ? 'rate_limited'
+          : gatewayState.everReady
+            ? 'disconnected'
+            : 'starting';
       const body = JSON.stringify({
         ok: ready,
         status,

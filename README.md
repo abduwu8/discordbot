@@ -86,7 +86,7 @@ Free web services sleep after about 15 minutes without inbound HTTP traffic, whi
 
 **Do not run the bot locally with the same `DISCORD_TOKEN` as Render.** Discord allows one gateway session per token. `npm run dev` on your PC steals the connection from Render; when you close the terminal, that session dies and Render’s process can be left with HTTP still “up” while the bot is offline in Discord. Stop the local process (or use a separate development bot application) and let only Render hold the production token.
 
-`GET /` is a keep-alive (always HTTP 200). `GET /health` returns 200 while starting or connected. `status` is `starting`, `ok`, or `disconnected`. `ok: true` and a bot tag mean Discord is actually online. `disconnected` returns 503 so Render can restart.
+`GET /` is a keep-alive (always HTTP 200). `GET /health` returns 200 while starting, rate-limited, or connected. `ok: true` and a bot tag mean Discord is actually online. If Discord returns HTTP 429, wait — do not restart the Render service, or the block lasts longer.
 
 Local JSON files under `data/` are ephemeral on Render (no persistent disk on the free tier). Cooldowns and introductions reset on every restart.
 

@@ -5,8 +5,8 @@ import { clientOptions } from './config/client.js';
 import './database/supabase.js';
 import { loadCommands } from './handlers/loadCommands.js';
 import { loadEvents } from './handlers/loadEvents.js';
-import { registerSlashCommands } from './handlers/registerCommands.js';
 import { attachGatewayWatch } from './discord/gatewayWatch.js';
+import { loginWithBackoff } from './discord/loginWithBackoff.js';
 import { startHealthServer } from './http/server.js';
 import { BellaClient } from './types/client.js';
 import { logger } from './utils/logger.js';
@@ -23,19 +23,10 @@ async function bootstrap(): Promise<void> {
 
   await loadEvents(client);
   await loadCommands(client);
-  attachGatewayWatch(client, () => shuttingDown);
+  attachGatewayWatch(client);
 
-  await probeDiscordToken(env.DISCORD_TOKEN);
-  logger.info(`Logging in to Discord (token length ${env.DISCORD_TOKEN.length})`);
-  await client.login(env.DISCORD_TOKEN);
-
-  if (env.NODE_ENV === 'production') {
-    try {
-      await registerSlashCommands(client);
-    } catch (error: unknown) {
-      logger.error('Failed to register slash commands on startup:', error);
-    }
-  }
+  logger.info('Logging in to Discord…');
+  await loginWithBackoff(() => client.login(env.DISCORD_TOKEN), () => shuttingDown);
 }
 
 async function shutdown(signal: string): Promise<void> {
@@ -74,24 +65,4 @@ process.on('unhandledRejection', (reason: unknown) => {
 
 void bootstrap().catch((error: unknown) => {
   logger.error('Bella failed to start:', error);
-  process.exit(1);
 });
-
-async function probeDiscordToken(token: string): Promise<void> {
-  try {
-    const response = await fetch('https://discord.com/api/v10/users/@me', {
-      headers: { Authorization: `Bot ${token}` },
-    });
-
-    if (response.ok) {
-      const user = (await response.json()) as { username?: string };
-      logger.success(`Discord REST reachable as ${user.username ?? 'unknown'}`);
-      return;
-    }
-
-    const body = await response.text();
-    logger.error(`Discord REST rejected the token (HTTP ${response.status}): ${body.slice(0, 300)}`);
-  } catch (error: unknown) {
-    logger.error('Discord REST probe failed (network):', error);
-  }
-}
