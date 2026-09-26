@@ -1,5 +1,6 @@
 import { REST, Routes } from 'discord.js';
 import { env } from '../config/env.js';
+import { commandGuildIds } from '../config/guilds.js';
 import type { BellaClient } from '../types/client.js';
 import { collectCommandData } from './loadCommands.js';
 import { logger } from '../utils/logger.js';
@@ -24,6 +25,8 @@ export async function registerSlashCommands(client?: BellaClient): Promise<void>
     return;
   }
 
-  await rest.put(Routes.applicationGuildCommands(env.CLIENT_ID, env.GUILD_ID), { body });
-  logger.success(`Registered guild commands for ${env.GUILD_ID}.`);
+  for (const guildId of commandGuildIds()) {
+    await rest.put(Routes.applicationGuildCommands(env.CLIENT_ID, guildId), { body });
+    logger.success(`Registered guild commands for ${guildId}.`);
+  }
 }
