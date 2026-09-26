@@ -1,14 +1,17 @@
 import { Events, type Client } from 'discord.js';
 import { logger } from '../utils/logger.js';
 
+export const gatewayState = {
+  everReady: false,
+};
+
 /**
  * Discord allows only one gateway session per bot token. A local `npm run dev`
- * with the same token kicks Render off. HTTP can stay up while the WebSocket
- * is dead. After a stolen/invalidated session, exiting lets Render start clean.
+ * with the same token kicks Render off. After a stolen/invalidated session,
+ * exiting lets Render start a clean login — but only after we have been ready
+ * once, so startup health checks do not kill the process before login.
  */
 export function attachGatewayWatch(client: Client, isShuttingDown: () => boolean): void {
-  let everReady = false;
-
   const recycle = (reason: string): void => {
     if (isShuttingDown()) {
       return;
@@ -19,7 +22,7 @@ export function attachGatewayWatch(client: Client, isShuttingDown: () => boolean
   };
 
   client.on(Events.ClientReady, () => {
-    everReady = true;
+    gatewayState.everReady = true;
   });
 
   client.on(Events.Error, (error) => {
@@ -51,8 +54,16 @@ export function attachGatewayWatch(client: Client, isShuttingDown: () => boolean
     logger.error(`Shard ${shardId} error:`, error);
   });
 
+  setTimeout(() => {
+    if (isShuttingDown() || client.isReady()) {
+      return;
+    }
+
+    recycle('login timed out');
+  }, 90_000);
+
   setInterval(() => {
-    if (isShuttingDown() || !everReady || client.isReady()) {
+    if (isShuttingDown() || !gatewayState.everReady || client.isReady()) {
       return;
     }
 

@@ -1,5 +1,6 @@
 import { createServer, type Server } from 'node:http';
 import type { Client } from 'discord.js';
+import { gatewayState } from '../discord/gatewayWatch.js';
 import { logger } from '../utils/logger.js';
 
 export function startHealthServer(port: number, client: Client): Server {
@@ -8,17 +9,17 @@ export function startHealthServer(port: number, client: Client): Server {
 
     if (req.method === 'GET' && (path === '/' || path === '/health')) {
       const ready = client.isReady();
+      const status = ready ? 'ok' : gatewayState.everReady ? 'disconnected' : 'starting';
       const body = JSON.stringify({
         ok: ready,
-        status: ready ? 'ok' : 'disconnected',
+        status,
         bot: ready ? (client.user?.tag ?? null) : null,
         ping: ready ? client.ws.ping : null,
       });
 
-      // `/` stays 200 so uptime pings keep the free instance awake even during
-      // a brief reconnect. `/health` is 503 when the Discord gateway is down
-      // so Render recycles the process instead of serving a dead bot.
-      const httpStatus = path === '/' || ready ? 200 : 503;
+      // 503 only after a successful login then a drop. Startup must stay 200
+      // or Render restarts the service before Discord can connect.
+      const httpStatus = path === '/' || status !== 'disconnected' ? 200 : 503;
 
       res.writeHead(httpStatus, {
         'Content-Type': 'application/json',

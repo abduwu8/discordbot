@@ -24,6 +24,8 @@ async function bootstrap(): Promise<void> {
   await loadCommands(client);
   attachGatewayWatch(client, () => shuttingDown);
 
+  await client.login(env.DISCORD_TOKEN);
+
   if (env.NODE_ENV === 'production') {
     try {
       await registerSlashCommands(client);
@@ -31,8 +33,6 @@ async function bootstrap(): Promise<void> {
       logger.error('Failed to register slash commands on startup:', error);
     }
   }
-
-  await client.login(env.DISCORD_TOKEN);
 }
 
 async function shutdown(signal: string): Promise<void> {
