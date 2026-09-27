@@ -359,13 +359,18 @@ async function startDifficulty(interaction: ButtonInteraction, difficulty: Debug
   session.message = await interaction.fetchReply();
 }
 
-function parseSessionPayload(payload: string): { sessionId: string; questionIndex: number; selected?: string } | undefined {
+function parseSessionPayload(
+  payload: string,
+): { sessionId: string; questionIndex: number; selected?: string } | undefined {
   const parts = payload.split(':');
   const sessionId = parts[0];
   const questionIndex = Number(parts[1]);
   const selected = parts[2];
   if (!sessionId || Number.isNaN(questionIndex)) {
     return undefined;
+  }
+  if (selected === undefined) {
+    return { sessionId, questionIndex };
   }
   return { sessionId, questionIndex, selected };
 }
