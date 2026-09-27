@@ -1,6 +1,8 @@
 import { DiscordAPIError, Events } from 'discord.js';
 import { isBotOwner } from '../config/owner.js';
 import { handleBattleAnswer } from '../features/battle/handler.js';
+import { handleDebugButton } from '../features/debug/handler.js';
+import { handleInterviewButton } from '../features/interview/handler.js';
 import { handleIntroductionButton, handleIntroductionModal } from '../features/introduction/handler.js';
 import { handleResumeButton, handleResumeModal } from '../features/resume/handler.js';
 import { BellaClient } from '../types/client.js';
@@ -29,6 +31,12 @@ export const event: Event<Events.InteractionCreate> = {
           return;
         }
         if (await handleResumeButton(interaction)) {
+          return;
+        }
+        if (await handleInterviewButton(interaction)) {
+          return;
+        }
+        if (await handleDebugButton(interaction)) {
           return;
         }
         await handleTestComponent(interaction);
