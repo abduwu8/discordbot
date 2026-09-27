@@ -72,6 +72,8 @@ export function buildResumePanel(): ContainerBuilder {
           '- Only **you** see the result.',
           '- Optional target role in the form (e.g. Junior Accountant).',
           '- **24 hour cooldown** after a successful run.',
+          '',
+          'Please drop a review in <#1553823058882601111>. It helps us improve the bot.',
         ].join('\n'),
       ),
     )

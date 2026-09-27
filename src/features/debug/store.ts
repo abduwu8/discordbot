@@ -8,6 +8,8 @@ export type DebugSession = {
   questions: DebugQuestion[];
   index: number;
   score: number;
+  selected: string | undefined;
+  revealed: boolean;
   feedback: string | undefined;
   message: Message | undefined;
 };

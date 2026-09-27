@@ -104,13 +104,15 @@ export function buildInterviewStartPanel(): ContainerBuilder {
       new TextDisplayBuilder().setContent(
         [
           '# Prepare for Interview',
-          'Pick a role. You get **5 MCQs**, **30 seconds** each, drawn from a **10-question** bank (shuffled every run).',
+          'Pick a role. You get **5 MCQs**, **30 seconds** each.',
           '',
-          'Use this as many times as you want. The question bank is **updated weekly** so you can keep practicing.',
+          'Use this as many times as you want. Questions are **reshuffled every week**.',
           '',
-          '- **Software Developer** — data structures, Git, debugging, how the web works',
-          '- **Frontend Engineer** — HTML/CSS/JS and React',
-          '- **Backend Engineer** — APIs, auth, databases, and production basics',
+          '- **Software Developer:** data structures, Git, debugging, how the web works',
+          '- **Frontend Engineer:** HTML/CSS/JS and React',
+          '- **Backend Engineer:** APIs, auth, databases, and production basics',
+          '',
+          'Please drop a review in <#1553823058882601111>. It helps us improve the bot.',
         ].join('\n'),
       ),
     )
@@ -155,8 +157,7 @@ function resultsBody(session: InterviewSession): string {
 
   lines.push(
     '',
-    'Run this again anytime — a new shuffled set of 5 comes from the 10-question bank.',
-    'Questions are **updated weekly**, so come back and keep drilling.',
+    'Run this again anytime. Questions are **reshuffled every week**.',
   );
   return lines.join('\n');
 }
@@ -198,9 +199,7 @@ function panelPayload(container: ContainerBuilder, ephemeral: boolean): Interact
 }
 
 export async function postInterviewPanel(interaction: ChatInputCommandInteraction): Promise<void> {
-  deleteInterviewSession(interaction.user.id);
-  await interaction.deferReply({ ephemeral: true });
-  await interaction.editReply(panelPayload(buildInterviewStartPanel(), false));
+  await interaction.reply(panelPayload(buildInterviewStartPanel(), false));
 }
 
 function correctLine(question: InterviewQuestion): string {
